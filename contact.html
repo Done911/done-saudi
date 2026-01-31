@@ -62,17 +62,70 @@
 </header>
 
 <div class="form-container">
-  <form>
-    <input type="text" placeholder="اسمك" required>
-    <input type="email" placeholder="بريدك الإلكتروني" required>
-    <textarea placeholder="رسالتك" rows="4" required></textarea>
-    <button type="submit">إرسال</button>
+  <form id="contact-form">
+    <input type="text" id="name" placeholder="اسمك" required>
+    <input type="email" id="email" placeholder="بريدك الإلكتروني" required>
+    <textarea id="message" placeholder="رسالتك" rows="4" required></textarea>
+    <button type="submit" id="submit-btn">إرسال</button>
   </form>
+  <div id="response-message" style="margin-top: 20px; padding: 15px; border-radius: 6px; display: none;"></div>
 </div>
 
 <footer>
   © 2025 جميع الحقوق محفوظة لمتجر دن
 </footer>
+
+<script type="module">
+  const SUPABASE_URL = 'https://kbualjhhdjkzizunanlc.supabase.co';
+  const API_URL = `${SUPABASE_URL}/functions/v1/send-contact`;
+
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submit-btn');
+    const messageDiv = document.getElementById('response-message');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'جاري الإرسال...';
+    messageDiv.style.display = 'none';
+
+    const data = {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      message: document.getElementById('message').value
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = '#d4edda';
+        messageDiv.style.color = '#155724';
+        messageDiv.textContent = result.message;
+        document.getElementById('contact-form').reset();
+      } else {
+        throw new Error(result.error || 'حدث خطأ أثناء إرسال الرسالة');
+      }
+    } catch (error) {
+      messageDiv.style.display = 'block';
+      messageDiv.style.background = '#f8d7da';
+      messageDiv.style.color = '#721c24';
+      messageDiv.textContent = 'خطأ: ' + error.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'إرسال';
+    }
+  });
+</script>
 
 </body>
 </html>

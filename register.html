@@ -62,18 +62,72 @@
 </header>
 
 <div class="form-container">
-  <form>
-    <input type="text" placeholder="اسم المتجر" required>
-    <input type="text" placeholder="رابط المتجر" required>
-    <input type="email" placeholder="البريد الإلكتروني" required>
-    <textarea placeholder="وصف المتجر" rows="4" required></textarea>
-    <button type="submit">إرسال الطلب</button>
+  <form id="register-form">
+    <input type="text" id="name" placeholder="اسم المتجر" required>
+    <input type="text" id="url" placeholder="رابط المتجر" required>
+    <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+    <textarea id="description" placeholder="وصف المتجر" rows="4" required></textarea>
+    <button type="submit" id="submit-btn">إرسال الطلب</button>
   </form>
+  <div id="message" style="margin-top: 20px; padding: 15px; border-radius: 6px; display: none;"></div>
 </div>
 
 <footer>
   © 2025 جميع الحقوق محفوظة لمتجر دن
 </footer>
+
+<script type="module">
+  const SUPABASE_URL = 'https://kbualjhhdjkzizunanlc.supabase.co';
+  const API_URL = `${SUPABASE_URL}/functions/v1/register-store`;
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submit-btn');
+    const messageDiv = document.getElementById('message');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'جاري الإرسال...';
+    messageDiv.style.display = 'none';
+
+    const data = {
+      name: document.getElementById('name').value,
+      url: document.getElementById('url').value,
+      email: document.getElementById('email').value,
+      description: document.getElementById('description').value
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = '#d4edda';
+        messageDiv.style.color = '#155724';
+        messageDiv.textContent = result.message;
+        document.getElementById('register-form').reset();
+      } else {
+        throw new Error(result.error || 'حدث خطأ أثناء إرسال الطلب');
+      }
+    } catch (error) {
+      messageDiv.style.display = 'block';
+      messageDiv.style.background = '#f8d7da';
+      messageDiv.style.color = '#721c24';
+      messageDiv.textContent = 'خطأ: ' + error.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'إرسال الطلب';
+    }
+  });
+</script>
 
 </body>
 </html>
